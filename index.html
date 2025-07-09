@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Viagem Interestelar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+
+        .separeted {
+            gap: 50%;
+
+        }
+
+        .card-gradient {
+            background: linear-gradient(135deg, rgba(16, 20, 31, 0.8) 0%, rgba(32, 39, 55, 0.8) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .input-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #4F46E5;
+            cursor: pointer;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.3);
+            transition: all 0.2s ease;
+            border: 2px solid white;
+        }
+
+        .input-range::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 6px rgba(79, 70, 229, 0.4);
+        }
+
+        .input-range::-webkit-slider-runnable-track {
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #1E293B 0%, #4F46E5 100%);
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.2;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .glow-text {
+            text-shadow: 0 0 10px rgba(79, 70, 229, 0.7);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .info-card {
+            background: rgba(16, 20, 31, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(79, 70, 229, 0.5);
+        }
+
+        .distance-selector {
+            background: rgba(16, 20, 31, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .distance-selector:hover {
+            border-color: rgba(79, 70, 229, 0.5);
+        }
+
+        .distance-selector.active {
+            background: rgba(79, 70, 229, 0.2);
+            border-color: rgba(79, 70, 229, 0.7);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .galaxy-preview {
+            background: linear-gradient(90deg, rgba(16, 20, 31, 0) 0%, rgba(79, 70, 229, 0.1) 50%, rgba(16, 20, 31, 0) 100%);
+        }
+
+        .speed-preset {
+            background: rgba(16, 20, 31, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .speed-preset:hover {
+            background: rgba(79, 70, 229, 0.2);
+            border-color: rgba(79, 70, 229, 0.5);
+        }
+
+        .speed-preset.active {
+            background: rgba(79, 70, 229, 0.3);
+            border-color: rgba(79, 70, 229, 0.7);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+        }
+
+        .speed-indicator {
+            position: relative;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 8px;
+        }
+
+        .speed-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #4F46E5, #7C3AED);
+            transition: width 0.3s ease;
+        }
+
+        .speed-marker {
+            position: absolute;
+            top: -6px;
+            width: 2px;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .speed-marker-label {
+            position: absolute;
+            top: 20px;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .input-range-container:hover .tooltip {
+            opacity: 1;
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Remove number input arrows */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-white">
+
+    <div class="stars" id="stars"></div>
+
+    <div class="container mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-screen">
+        <div class="w-full max-w-[400px]">
+
+            <div class="card-gradient rounded-2xl p-6 shadow-2xl">
+                <div class="text-center mb-10">
+                    <div
+                        class="inline-flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 w-16 h-16 rounded-full mb-4 pulse">
+                        <i class="fas fa-rocket text-2xl"></i>
+                    </div>
+
+                    <p class="text-indigo-300 font-medium">Explore os limites do espaço-tempo</p>
+                </div>
+
+                <div class="space-y-8">
+                    <div>
+                        <label for="distance" class="block text-sm font-medium text-indigo-300 mb-3 flex items-center">
+                            <i class="fas fa-ruler-combined mr-2"></i> Distância em anos-luz
+                        </label>
+
+                        <!-- Seletor de escala de distância -->
+                        <div class="grid grid-cols-4 gap-2 mb-4">
+                            <button class="distance-selector py-2 rounded-lg text-xs md:text-sm" data-multiplier="1">
+                                Padrão
+                            </button>
+                            <button class="distance-selector py-2 rounded-lg text-xs md:text-sm" data-multiplier="1000">
+                                Milhares
+                            </button>
+                            <button class="distance-selector py-2 rounded-lg text-xs md:text-sm"
+                                data-multiplier="1000000">
+                                Milhões
+                            </button>
+                            <button class="distance-selector py-2 rounded-lg text-xs md:text-sm"
+                                data-multiplier="1000000000">
+                                Bilhões
+                            </button>
+                        </div>
+
+                        <div class="relative">
+                            <input type="number" id="distance" min="1" step="0.1"
+                                class="w-full bg-gray-900 bg-opacity-50 border border-gray-800 rounded-xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                                placeholder="Ex: 4.37 (Próxima Centauri)">
+                            <span class="absolute right-5 top-4 text-gray-400 text-sm" id="distanceUnit">anos-luz</span>
+                        </div>
+
+                        <!-- Preview de distâncias cósmicas -->
+                        <div class="mt-3">
+                            <div class="flex items-center justify-between text-xs text-gray-400 mb-1">
+                                <span>Distâncias de referência:</span>
+                                <button id="showExamples"
+                                    class="text-indigo-400 hover:text-indigo-300 transition-colors">
+                                    <i class="fas fa-info-circle mr-1"></i> Mostrar exemplos
+                                </button>
+                            </div>
+                            <div id="distanceExamples" class="hidden galaxy-preview p-3 rounded-lg text-xs space-y-2">
+                                <div class="flex justify-between">
+                                    <span class="text-indigo-300">Próxima Centauri</span>
+                                    <span>4.37 anos-luz</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-indigo-300">Centro da Via Láctea</span>
+                                    <span>26,000 anos-luz</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-indigo-300">Andrômeda (M31)</span>
+                                    <span>2.5 milhões de anos-luz</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-indigo-300">Galáxia mais distante</span>
+                                    <span>13.4 bilhões de anos-luz</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <label for="speed" class="block text-sm font-medium text-indigo-300 flex items-center">
+                                <i class="fas fa-tachometer-alt mr-2"></i> Velocidade da nave
+                            </label>
+                            <div class="relative">
+                                <span id="speedValue"
+                                    class="font-bold text-lg bg-indigo-900 bg-opacity-30 px-3 py-1 rounded-lg">50%</span>
+                                <span class="text-xs text-indigo-300 ml-1">da luz</span>
+                            </div>
+                        </div>
+
+                        <!-- Controle de velocidade aprimorado -->
+                        <div class="input-range-container relative mb-2">
+                            <input type="range" id="speed" min="1" max="99" value="50"
+                                class="w-full input-range h-2 rounded-full appearance-none cursor-pointer">
+                            <div class="tooltip" id="speedTooltip">50% da velocidade da luz</div>
+                        </div>
+
+                        <!-- Indicador visual de velocidade -->
+                        <div class="speed-indicator">
+                            <div class="speed-fill" id="speedFill" style="width: 50%"></div>
+                            <div class="speed-marker" style="left: 25%"></div>
+                            <div class="speed-marker" style="left: 50%"></div>
+                            <div class="speed-marker" style="left: 75%"></div>
+                            <div class="speed-marker-label" style="left: 25%">25%</div>
+                            <div class="speed-marker-label" style="left: 50%">50%</div>
+                            <div class="speed-marker-label" style="left: 75%">75%</div>
+                        </div>
+
+                        <!-- Predefinições de velocidade -->
+                        <div class="grid grid-cols-4 gap-2 mt-4">
+                            <div class="speed-preset text-center py-2 rounded-lg text-xs" data-speed="10">
+                                <i class="fas fa-car text-indigo-300 mb-1"></i>
+                                <div>10%</div>
+                                <div class="text-xxs text-gray-400">Sub-luminosa</div>
+                            </div>
+                            <div class="speed-preset text-center py-2 rounded-lg text-xs" data-speed="50">
+                                <i class="fas fa-space-shuttle text-indigo-300 mb-1"></i>
+                                <div>50%</div>
+                                <div class="text-xxs text-gray-400">Intermediária</div>
+                            </div>
+                            <div class="speed-preset text-center py-2 rounded-lg text-xs" data-speed="90">
+                                <i class="fas fa-bolt text-indigo-300 mb-1"></i>
+                                <div>90%</div>
+                                <div class="text-xxs text-gray-400">Relativística</div>
+                            </div>
+                            <div class="speed-preset text-center py-2 rounded-lg text-xs" data-speed="99">
+                                <i class="fas fa-star text-indigo-300 mb-1"></i>
+                                <div>99%</div>
+                                <div class="text-xxs text-gray-400">Extrema</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center pt-4">
+                        <button id="calculate"
+                            class="btn-gradient text-white font-bold py-4 px-8 rounded-xl flex items-center">
+                            <i class="fas fa-paper-plane mr-3"></i> Calcular Viagem
+                        </button>
+                    </div>
+
+                    <div id="results" class="hidden mt-10 space-y-6 fade-in">
+                        <div class="info-card p-5 rounded-xl">
+                            <div class="flex items-center mb-3">
+                                <div class="bg-indigo-900 bg-opacity-50 p-2 rounded-lg mr-3">
+                                    <i class="fas fa-clock text-indigo-400"></i>
+                                </div>
+                                <h3 class="text-sm font-medium text-indigo-300">Tempo estimado de viagem</h3>
+                            </div>
+                            <p class="text-3xl font-bold mb-1" id="travelTime">-</p>
+                            <p class="text-xs text-gray-400">Considerando efeitos relativísticos</p>
+                        </div>
+
+                        <div class="info-card p-6 rounded-xl">
+                            <h3 class="text-sm font-medium text-indigo-300 mb-4 flex items-center">
+                                <i class="fas fa-info-circle mr-2"></i> Detalhes da viagem
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div class="flex items-center">
+                                    <div
+                                        class="w-5 h-5 rounded-full bg-indigo-900 bg-opacity-50 flex items-center justify-center mr-3">
+                                        <i class="fas fa-compress text-indigo-400 text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-400">Distância contratada:</p>
+                                        <p class="font-medium" id="contractedDistance">-</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div
+                                        class="w-5 h-5 rounded-full bg-indigo-900 bg-opacity-50 flex items-center justify-center mr-3">
+                                        <i class="fas fa-atom text-indigo-400 text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-400">Fator de Lorentz (γ):</p>
+                                        <p class="font-medium" id="lorentzFactor">-</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div
+                                        class="w-5 h-5 rounded-full bg-indigo-900 bg-opacity-50 flex items-center justify-center mr-3">
+                                        <i class="fas fa-expand text-indigo-400 text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-400">Expansão cósmica:</p>
+                                        <p class="font-medium" id="expansionFactor">-</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div
+                                        class="w-5 h-5 rounded-full bg-indigo-900 bg-opacity-50 flex items-center justify-center mr-3">
+                                        <i class="fas fa-bolt text-indigo-400 text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-400">Velocidade efetiva:</p>
+                                        <p class="font-medium" id="effectiveSpeed">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 text-center text-gray-400 text-sm">
+                <p class="mb-4">Este simulador considera efeitos relativísticos e cósmicos:</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <div class="flex items-center bg-gray-900 bg-opacity-50 px-3 py-2 rounded-full">
+                        <i class="fas fa-compress text-indigo-400 mr-2 text-xs"></i>
+                        <span>Contração do espaço-tempo</span>
+                    </div>
+                    <div class="flex items-center bg-gray-900 bg-opacity-50 px-3 py-2 rounded-full">
+                        <i class="fas fa-expand text-indigo-400 mr-2 text-xs"></i>
+                        <span>Expansão acelerada do universo</span>
+                    </div>
+                    <div class="flex items-center bg-gray-900 bg-opacity-50 px-3 py-2 rounded-full">
+                        <i class="fas fa-atom text-indigo-400 mr-2 text-xs"></i>
+                        <span>Efeitos relativísticos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Create stars background
+            function createStars() {
+                const starsContainer = document.getElementById('stars');
+                const starsCount = 200;
+
+                for (let i = 0; i < starsCount; i++) {
+                    const star = document.createElement('div');
+                    star.classList.add('star');
+
+                    // Random properties
+                    const size = Math.random() * 2;
+                    const posX = Math.random() * 100;
+                    const posY = Math.random() * 100;
+                    const duration = 5 + Math.random() * 10;
+                    const delay = Math.random() * 5;
+
+                    star.style.width = `${size}px`;
+                    star.style.height = `${size}px`;
+                    star.style.left = `${posX}%`;
+                    star.style.top = `${posY}%`;
+                    star.style.setProperty('--duration', `${duration}s`);
+                    star.style.animationDelay = `${delay}s`;
+
+                    starsContainer.appendChild(star);
+                }
+            }
+
+            createStars();
+
+            // Calculator functionality
+            const distanceInput = document.getElementById('distance');
+            const distanceUnit = document.getElementById('distanceUnit');
+            const speedInput = document.getElementById('speed');
+            const speedValue = document.getElementById('speedValue');
+            const speedFill = document.getElementById('speedFill');
+            const speedTooltip = document.getElementById('speedTooltip');
+            const calculateBtn = document.getElementById('calculate');
+            const resultsDiv = document.getElementById('results');
+            const travelTimeSpan = document.getElementById('travelTime');
+            const contractedDistanceSpan = document.getElementById('contractedDistance');
+            const lorentzFactorSpan = document.getElementById('lorentzFactor');
+            const expansionFactorSpan = document.getElementById('expansionFactor');
+            const effectiveSpeedSpan = document.getElementById('effectiveSpeed');
+            const distanceSelectors = document.querySelectorAll('.distance-selector');
+            const showExamplesBtn = document.getElementById('showExamples');
+            const distanceExamples = document.getElementById('distanceExamples');
+            const speedPresets = document.querySelectorAll('.speed-preset');
+
+            let currentMultiplier = 1;
+
+            // Update speed control
+            function updateSpeedDisplay(value) {
+                speedValue.textContent = `${value}%`;
+                speedFill.style.width = `${value}%`;
+                speedTooltip.textContent = `${value}% da velocidade da luz`;
+
+                // Update active preset
+                speedPresets.forEach(preset => {
+                    if (parseInt(preset.dataset.speed) === value) {
+                        preset.classList.add('active');
+                    } else {
+                        preset.classList.remove('active');
+                    }
+                });
+            }
+
+            // Initialize speed display
+            updateSpeedDisplay(speedInput.value);
+
+            // Speed input event
+            speedInput.addEventListener('input', function () {
+                updateSpeedDisplay(this.value);
+            });
+
+            // Speed presets
+            speedPresets.forEach(preset => {
+                preset.addEventListener('click', function () {
+                    const speed = parseInt(this.dataset.speed);
+                    speedInput.value = speed;
+                    updateSpeedDisplay(speed);
+
+                    // Animation feedback
+                    this.classList.add('transform', 'scale-95');
+                    setTimeout(() => {
+                        this.classList.remove('transform', 'scale-95');
+                    }, 200);
+                });
+            });
+
+            // Distance scale selector
+            distanceSelectors.forEach(selector => {
+                selector.addEventListener('click', function () {
+                    // Remove active class from all buttons
+                    distanceSelectors.forEach(btn => btn.classList.remove('active'));
+
+                    // Add active class to clicked button
+                    this.classList.add('active');
+
+                    // Update multiplier
+                    currentMultiplier = parseInt(this.dataset.multiplier);
+
+                    // Update unit display
+                    updateDistanceUnit();
+                });
+            });
+
+            // Set default selector (Padrão) as active
+            distanceSelectors[0].classList.add('active');
+
+            function updateDistanceUnit() {
+                let unitText = 'anos-luz';
+
+                if (currentMultiplier === 1000) {
+                    unitText = 'mil anos-luz';
+                } else if (currentMultiplier === 1000000) {
+                    unitText = 'milhões de anos-luz';
+                } else if (currentMultiplier === 1000000000) {
+                    unitText = 'bilhões de anos-luz';
+                }
+
+                distanceUnit.textContent = unitText;
+            }
+
+            // Toggle distance examples
+            showExamplesBtn.addEventListener('click', function () {
+                distanceExamples.classList.toggle('hidden');
+                this.innerHTML = distanceExamples.classList.contains('hidden')
+                    ? '<i class="fas fa-info-circle mr-1"></i> Mostrar exemplos'
+                    : '<i class="fas fa-times mr-1"></i> Ocultar exemplos';
+            });
+
+            calculateBtn.addEventListener('click', function () {
+                const baseDistance = parseFloat(distanceInput.value);
+
+                if (isNaN(baseDistance) || baseDistance <= 0) {
+                    alert("Por favor, insira uma distância válida.");
+                    return;
+                }
+
+                // Apply multiplier to get actual distance
+                const distance = baseDistance * currentMultiplier;
+                const speedPercentage = parseInt(speedInput.value);
+
+                // Velocity as fraction of light speed (0.01 to 0.99)
+                const v = speedPercentage / 100;
+
+                // Relativistic calculations
+                const gamma = 1 / Math.sqrt(1 - v * v); // Lorentz factor
+                const contractedDistance = distance / gamma; // Length contraction
+
+                // Time calculation (average of proper time and Earth time)
+                const time = (distance / v) * Math.sqrt(gamma);
+
+                // Considering universe expansion (simplified)
+                const H0 = 7.25e-11; // Hubble constant in years^-1
+                const expansionFactor = 1 + H0 * time;
+
+                // Effective speed considering expansion
+                const effectiveSpeed = distance / (time * expansionFactor);
+
+                // Format large numbers
+                function formatLargeNumber(num) {
+                    if (num >= 1000000000) {
+                        return (num / 1000000000).toFixed(2) + ' bilhões';
+                    } else if (num >= 1000000) {
+                        return (num / 1000000).toFixed(2) + ' milhões';
+                    } else if (num >= 1000) {
+                        return (num / 1000).toFixed(2) + ' mil';
+                    } else {
+                        return num.toFixed(2);
+                    }
+                }
+
+                // Display results with appropriate formatting
+                travelTimeSpan.textContent = formatLargeNumber(time) + " anos";
+                contractedDistanceSpan.textContent = formatLargeNumber(contractedDistance) + " anos-luz";
+                lorentzFactorSpan.textContent = gamma.toFixed(4);
+                expansionFactorSpan.textContent = expansionFactor.toFixed(6);
+                effectiveSpeedSpan.textContent = (effectiveSpeed * 100).toFixed(2) + "% c";
+
+                // Show results with animation
+                resultsDiv.classList.remove('hidden');
+                resultsDiv.classList.add('fade-in');
+
+                // Scroll to center the results
+                setTimeout(() => {
+                    resultsDiv.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }, 100);
+
+                // Button animation
+                calculateBtn.classList.add('transform', 'scale-95');
+                setTimeout(() => {
+                    calculateBtn.classList.remove('transform', 'scale-95');
+                }, 200);
+            });
+        });
+    </script>
+</body>
+
+</html>
